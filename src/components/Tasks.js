@@ -99,10 +99,10 @@ export function Tasks() {
         badge.style.borderRadius = 'var(--radius-full)';
 
         // Color logic
-        if (t.priority === 'High' || t.priority === 'Critical') {
+        if (t.priority === 'Alta' || t.priority === 'Crítica') {
             badge.style.backgroundColor = 'rgba(255, 118, 117, 0.2)';
             badge.style.color = '#ff7675';
-        } else if (t.priority === 'Medium') {
+        } else if (t.priority === 'Media') {
             badge.style.backgroundColor = 'rgba(253, 203, 110, 0.2)';
             badge.style.color = '#fdcb6e';
         } else {

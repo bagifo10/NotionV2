@@ -2,12 +2,22 @@ export function Calendar() {
     const container = document.createElement('div');
     container.className = 'flex-col w-full h-full gap-md';
 
+    // Current Date Logic
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth(); // 0-indexed
+
+    const monthNames = [
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+
     // Header (Month/Week toggle + Controls)
     const header = document.createElement('div');
     header.className = 'flex items-center justify-between';
 
     const title = document.createElement('h2');
-    title.innerText = 'Diciembre 2025';
+    title.innerText = `${monthNames[currentMonth]} ${currentYear}`;
     title.style.fontWeight = '600';
 
     const controls = document.createElement('div');
@@ -42,7 +52,7 @@ export function Calendar() {
     grid.style.display = 'grid';
     grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
     // Reduced row height for more compact/minimalist look
-    grid.style.gridAutoRows = 'minmax(80px, 1fr)'; // Was 120px
+    grid.style.gridAutoRows = 'minmax(80px, 1fr)';
     grid.style.gap = '1px';
     grid.style.backgroundColor = 'var(--border-light)'; // Lines
     grid.style.border = '1px solid var(--border-light)';
@@ -56,26 +66,27 @@ export function Calendar() {
         el.innerText = day;
         el.className = 'flex justify-center items-center text-muted text-xs';
         el.style.backgroundColor = 'var(--bg-app)';
-        el.style.padding = '8px'; // Reduced padding
+        el.style.padding = '8px';
         el.style.fontWeight = '500';
         grid.appendChild(el);
     });
 
-    // Days Grid Logic (Full Month - Dec 2025 starts on Monday)
-    // 1st is Monday (index 1). So 1 empty cell.
-    // December has 31 days.
+    // Days Grid Logic (Dynamic)
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay(); // 0 is Sunday
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 
-    // Empty cells for Sunday (Dec 1st is Monday)
-    if (true) { // Logic for Dec 2025
+    // Empty cells for days before the 1st
+    for (let i = 0; i < firstDay; i++) {
         const empty = document.createElement('div');
         empty.style.backgroundColor = 'var(--bg-card)';
         grid.appendChild(empty);
     }
 
-    for (let i = 1; i <= 31; i++) {
+    // Days
+    for (let i = 1; i <= daysInMonth; i++) {
         const cell = document.createElement('div');
         cell.style.backgroundColor = 'var(--bg-card)';
-        cell.style.padding = '6px'; // Reduced padding
+        cell.style.padding = '6px';
         cell.style.display = 'flex';
         cell.style.flexDirection = 'column';
         cell.style.gap = '4px';
@@ -85,6 +96,18 @@ export function Calendar() {
         dateNum.className = 'text-xs text-muted';
         dateNum.innerText = i;
 
+        // Highlight today
+        if (i === now.getDate()) {
+            dateNum.style.backgroundColor = 'var(--accent-primary)';
+            dateNum.style.color = 'var(--bg-app)';
+            dateNum.style.width = '20px';
+            dateNum.style.height = '20px';
+            dateNum.style.borderRadius = '50%';
+            dateNum.style.display = 'flex';
+            dateNum.style.alignItems = 'center';
+            dateNum.style.justifyContent = 'center';
+        }
+
         cell.appendChild(dateNum);
 
         // Random Mock Events
@@ -92,9 +115,9 @@ export function Calendar() {
             const event = document.createElement('div');
             event.className = 'text-xs';
             event.style.padding = '2px 6px';
-            event.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'; // More minimal
+            event.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
             event.style.color = '#ededed';
-            event.style.borderRadius = '2px'; // Sharper
+            event.style.borderRadius = '2px';
             event.innerText = 'Reunión';
             cell.appendChild(event);
         }
@@ -103,9 +126,11 @@ export function Calendar() {
     }
 
     // Fill remaining cells to make the grid look square (optional-ish)
-    // Total cells so far = 1 + 31 = 32. 
-    // Next multiple of 7 is 35. 3 empty cells at end.
-    for (let i = 0; i < 3; i++) {
+    const totalCells = firstDay + daysInMonth;
+    const remaining = (7 - (totalCells % 7)) % 7;
+
+    // Ensure at least 5 rows visually often looks better, but simple filling reference is fine
+    for (let i = 0; i < remaining; i++) {
         const empty = document.createElement('div');
         empty.style.backgroundColor = 'var(--bg-card)';
         grid.appendChild(empty);
