@@ -1,4 +1,5 @@
 import { askAI } from '../services/ai.js';
+import { addTask, addEvent, getFullContext } from '../services/data.js';
 
 export function Chatbot() {
     const container = document.createElement('div');
@@ -12,6 +13,21 @@ export function Chatbot() {
     header.className = 'flex justify-between items-center mb-4';
 
     const spacer = document.createElement('div');
+
+    const clearBtn = document.createElement('button');
+    clearBtn.innerText = '🗑️ Limpiar Chat';
+    clearBtn.className = 'text-xs hover-bg';
+    clearBtn.style.color = 'var(--text-muted)';
+    clearBtn.style.padding = '4px 8px';
+    clearBtn.style.borderRadius = 'var(--radius-sm)';
+    clearBtn.style.marginRight = '8px';
+    clearBtn.onclick = () => {
+        if (confirm('¿Borrar historial de chat?')) {
+            localStorage.removeItem('chat_history');
+            history.innerHTML = '';
+            addMessage('¡Hola! Soy NotionIA. ¿Cómo puedo ayudarte hoy?', 'ai');
+        }
+    };
 
     const settingsBtn = document.createElement('button');
     settingsBtn.innerText = '⚙️ Configurar Key';
@@ -28,7 +44,10 @@ export function Chatbot() {
     };
 
     header.appendChild(spacer);
-    header.appendChild(settingsBtn);
+    const btnGroup = document.createElement('div');
+    btnGroup.appendChild(clearBtn);
+    btnGroup.appendChild(settingsBtn);
+    header.appendChild(btnGroup);
 
     // Chat History
     const history = document.createElement('div');
@@ -38,7 +57,7 @@ export function Chatbot() {
     history.style.padding = 'var(--spacing-md) 0';
 
     // Helper to add message
-    const addMessage = (text, role) => {
+    const addMessage = (text, role, save = true) => {
         const bubbleWrapper = document.createElement('div');
         bubbleWrapper.className = `flex w-full ${role === 'user' ? 'justify-between' : ''}`;
         bubbleWrapper.style.justifyContent = role === 'user' ? 'flex-end' : 'flex-start';
@@ -46,7 +65,7 @@ export function Chatbot() {
         const bubble = document.createElement('div');
         bubble.style.padding = 'var(--spacing-md)';
         bubble.style.borderRadius = 'var(--radius-lg)';
-        bubble.style.maxWidth = '70%';
+        bubble.style.maxWidth = '85%'; // Wider for better readability
         bubble.style.lineHeight = '1.6';
         bubble.style.fontSize = '0.95rem';
 
@@ -55,21 +74,71 @@ export function Chatbot() {
             bubble.style.color = 'var(--bg-app)';
             bubble.style.borderBottomRightRadius = '2px';
             bubble.style.fontWeight = '500';
+            bubble.innerText = text;
         } else {
             bubble.style.backgroundColor = 'var(--bg-card)';
             bubble.style.color = 'var(--text-main)';
             bubble.style.border = '1px solid var(--border-light)';
             bubble.style.borderBottomLeftRadius = '2px';
+            // Simple markdown parsing for code blocks/bold
+            bubble.innerHTML = text
+                .replace(/\n/g, '<br>')
+                .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+                .replace(/```(.*?)```/gs, '<pre style="background:var(--bg-hover);padding:10px;border-radius:6px;overflow-x:auto;">$1</pre>');
         }
 
-        bubble.innerText = text;
         bubbleWrapper.appendChild(bubble);
         history.appendChild(bubbleWrapper);
         history.scrollTop = history.scrollHeight;
+
+        if (save) saveHistory();
     };
 
-    // Initial Message
-    addMessage('¡Hola! Soy NotionIA. ¿Cómo puedo ayudarte hoy?', 'ai');
+    const saveHistory = () => {
+        const msgs = [];
+        // This is a naive way to scrape history. Ideally use a state array.
+        // For simplicity in Vanilla JS, we'll push to localStorage manually or skip scraping DOM.
+        // Using a state array approach is better.
+    };
+
+    // State for storage
+    let localHistory = JSON.parse(localStorage.getItem('chat_history')) || [];
+
+    // Render existing
+    if (localHistory.length > 0) {
+        localHistory.forEach(msg => {
+            // Don't save again when rendering from storage
+            // Re-create DOM elements
+            // We reuse addMessage logic but modify it slightly to not duplicate
+            const bubbleWrapper = document.createElement('div');
+            bubbleWrapper.className = `flex w-full ${msg.role === 'user' ? 'justify-between' : ''}`;
+            bubbleWrapper.style.justifyContent = msg.role === 'user' ? 'flex-end' : 'flex-start';
+            const bubble = document.createElement('div');
+            bubble.style.padding = 'var(--spacing-md)';
+            bubble.style.borderRadius = 'var(--radius-lg)';
+            bubble.style.maxWidth = '85%';
+            bubble.style.lineHeight = '1.6';
+            bubble.style.fontSize = '0.95rem';
+            if (msg.role === 'user') {
+                bubble.style.backgroundColor = 'var(--accent-primary)';
+                bubble.style.color = 'var(--bg-app)';
+                bubble.innerText = msg.text;
+            } else {
+                bubble.style.backgroundColor = 'var(--bg-card)';
+                bubble.style.color = 'var(--text-main)';
+                bubble.style.border = '1px solid var(--border-light)';
+                bubble.innerHTML = msg.text
+                    .replace(/\n/g, '<br>')
+                    .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+                    .replace(/```(.*?)```/gs, '<pre style="background:var(--bg-hover);padding:10px;border-radius:6px;overflow-x:auto;">$1</pre>');
+            }
+            bubbleWrapper.appendChild(bubble);
+            history.appendChild(bubbleWrapper);
+        });
+        history.scrollTop = history.scrollHeight;
+    } else {
+        addMessage('¡Hola! Soy NotionIA. Puedo gestionar tus tareas y calendario. ¿Qué necesitas?', 'ai', false);
+    }
 
     // Input Area
     const inputContainer = document.createElement('div');
@@ -89,7 +158,7 @@ export function Chatbot() {
     const input = document.createElement('input');
     input.type = 'text';
     input.id = 'chat-input';
-    input.placeholder = 'Pregunta a NotionIA...';
+    input.placeholder = 'Ej: Agendar reunión mañana a las 10am...';
     input.className = 'w-full';
     input.style.background = 'transparent';
     input.style.border = 'none';
@@ -112,26 +181,61 @@ export function Chatbot() {
         const text = input.value.trim();
         if (!text) return;
 
-        addMessage(text, 'user');
+        // UI Update
+        addMessage(text, 'user', false);
         input.value = '';
 
-        addMessage('Pensando...', 'ai');
+        // Save to state
+        localHistory.push({ role: 'user', text: text });
+        localStorage.setItem('chat_history', JSON.stringify(localHistory));
 
-        // Use localStorage
+        // Thinking placeholder
+        const thinkingWrapper = document.createElement('div');
+        thinkingWrapper.innerText = 'Pensando...';
+        thinkingWrapper.className = 'text-muted text-sm';
+        thinkingWrapper.style.padding = '10px';
+        history.appendChild(thinkingWrapper);
+        history.scrollTop = history.scrollHeight;
+
         const apiKey = localStorage.getItem('openai_api_key');
-        // Simple check just in case, though main.js enforces it
         if (!apiKey) {
-            addMessage('⚠️ Falta la API Key. Recarga la página para configurarla.', 'ai');
-            history.removeChild(history.lastChild); // remove thinking
+            history.removeChild(thinkingWrapper);
+            addMessage('⚠️ Falta la API Key. Recarga la página para configurarla.', 'ai', false);
             return;
         }
 
-        const response = await askAI(text, apiKey);
+        // Get Context
+        const context = JSON.stringify(getFullContext());
 
-        // Remove "Thinking..." (Last child)
-        history.removeChild(history.lastChild);
+        // Call AI
+        const response = await askAI(text, apiKey, context);
 
-        addMessage(response, 'ai');
+        history.removeChild(thinkingWrapper);
+
+        // Parse Response for JSON actions
+        let finalResponse = response;
+        try {
+            // Check for JSON code block or raw JSON
+            const jsonMatch = response.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                const actionObj = JSON.parse(jsonMatch[0]);
+
+                if (actionObj.action === 'create_task') {
+                    addTask(actionObj.data);
+                    finalResponse = `✅ Tarea creada: **${actionObj.data.title}** (${actionObj.data.priority})`;
+                    // Notify Task Module
+                } else if (actionObj.action === 'create_event') {
+                    addEvent(actionObj.data);
+                    finalResponse = `✅ Evento agendado: **${actionObj.data.title}** para el ${actionObj.data.date}`;
+                }
+            }
+        } catch (e) {
+            console.log('No valid JSON action found, using raw text');
+        }
+
+        addMessage(finalResponse, 'ai', false);
+        localHistory.push({ role: 'ai', text: finalResponse });
+        localStorage.setItem('chat_history', JSON.stringify(localHistory));
     };
 
     sendBtn.onclick = handleSend;
