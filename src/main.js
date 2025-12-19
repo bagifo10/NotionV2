@@ -91,11 +91,11 @@ function showApiKeyModal() {
 
   btn.onclick = () => {
     const key = input.value.trim();
-    if (key.startsWith('sk-') && key.length > 20) {
+    if ((key.startsWith('sk-') || key.startsWith('gsk_')) && key.length > 20) {
       localStorage.setItem('openai_api_key', key);
       document.body.removeChild(overlay);
     } else {
-      errorMsg.innerText = 'Por favor ingresa una API Key válida (empieza con sk-).';
+      errorMsg.innerText = 'Por favor ingresa una API Key válida (empieza con gsk_ o sk-).';
       errorMsg.style.display = 'block';
     }
   };

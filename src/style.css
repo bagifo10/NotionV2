@@ -1,21 +1,21 @@
 :root {
-  /* Default Dark Mode (Familiar Minimalist) */
-  --bg-app: #191919;
-  --bg-sidebar: #202020;
-  --bg-card: #252525;
-  --bg-hover: #2f2f2f;
-  --bg-active: #37352f;
+  /* Default Light Mode (Beige/Familiero) */
+  --bg-app: #fdfbf7;
+  --bg-sidebar: #f7f3e8;
+  --bg-card: #ffffff;
+  --bg-hover: #ebe5d5;
+  --bg-active: #e3decb;
 
-  --text-main: #d9d9d9;
-  --text-muted: #9b9b9b;
-  --text-dim: #6e6e6e;
+  --text-main: #4a4036;
+  --text-muted: #8c7b6c;
+  --text-dim: #b0a69e;
 
-  --accent-primary: #ffffff;
-  --accent-secondary: #e0e0e0;
-  --accent-gradient: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+  --accent-primary: #a68a64;
+  --accent-secondary: #e6e2d6;
+  --accent-gradient: linear-gradient(135deg, #a68a64 0%, #8c7b6c 100%);
 
-  --border-light: rgba(255, 255, 255, 0.08);
-  --border-focus: rgba(255, 255, 255, 0.2);
+  --border-light: rgba(74, 64, 54, 0.08);
+  --border-focus: rgba(166, 138, 100, 0.5);
 
   /* Typography */
   --font-main: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
@@ -34,34 +34,33 @@
   --radius-full: 9999px;
 
   /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(74, 64, 54, 0.05);
+  --shadow-md: 0 4px 8px rgba(74, 64, 54, 0.08);
+  --shadow-lg: 0 12px 24px rgba(74, 64, 54, 0.12);
+}
+
+body.dark-mode {
+  /* Dark Mode (Familiar Minimalist) */
+  --bg-app: #191919;
+  --bg-sidebar: #202020;
+  --bg-card: #252525;
+  --bg-hover: #2f2f2f;
+  --bg-active: #37352f;
+
+  --text-main: #d9d9d9;
+  --text-muted: #9b9b9b;
+  --text-dim: #6e6e6e;
+
+  --accent-primary: #ffffff;
+  --accent-secondary: #e0e0e0;
+  --accent-gradient: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+
+  --border-light: rgba(255, 255, 255, 0.08);
+  --border-focus: rgba(255, 255, 255, 0.2);
+
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.2);
   --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.3);
-}
-
-body.light-mode {
-  /* Notion-like Light Mode */
-  --bg-app: #ffffff;
-  --bg-sidebar: #f7f7f5;
-  --bg-card: #ffffff;
-  --bg-hover: #efefef;
-  --bg-active: #e1e1e1;
-
-  --text-main: #37352f;
-  --text-muted: #787774;
-  --text-dim: #9b9a97;
-
-  --accent-primary: #2eaadc;
-  /* Subtle blue or stick to black/white */
-  --accent-secondary: #e0e0e0;
-  --accent-gradient: linear-gradient(135deg, #37352f 0%, #787774 100%);
-
-  --border-light: rgba(55, 53, 47, 0.09);
-  --border-focus: rgba(46, 170, 220, 0.5);
-
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 2px 5px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
 * {

@@ -96,23 +96,26 @@ export function Sidebar() {
 
     // Check local storage for theme
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') {
-        document.body.classList.add('light-mode');
-        themeToggle.innerHTML = '<span>🌙</span> <span>Modo Oscuro</span>';
-    } else {
+
+    // Default is now Light (no class). 'dark' adds class.
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
         themeToggle.innerHTML = '<span>☀️</span> <span>Modo Claro</span>';
+    } else {
+        // Default Light
+        themeToggle.innerHTML = '<span>🌙</span> <span>Modo Oscuro</span>';
     }
 
     themeToggle.onclick = () => {
         const body = document.body;
-        body.classList.toggle('light-mode');
+        body.classList.toggle('dark-mode');
 
-        if (body.classList.contains('light-mode')) {
-            localStorage.setItem('theme', 'light');
-            themeToggle.innerHTML = '<span>🌙</span> <span>Modo Oscuro</span>';
-        } else {
+        if (body.classList.contains('dark-mode')) {
             localStorage.setItem('theme', 'dark');
             themeToggle.innerHTML = '<span>☀️</span> <span>Modo Claro</span>';
+        } else {
+            localStorage.setItem('theme', 'light');
+            themeToggle.innerHTML = '<span>🌙</span> <span>Modo Oscuro</span>';
         }
     };
 
