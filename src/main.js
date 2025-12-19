@@ -53,7 +53,7 @@ function showApiKeyModal() {
   title.style.fontSize = '1.25rem';
 
   const desc = document.createElement('p');
-  desc.innerText = 'Para usar NotionIA, necesitas conectar tu propia API Key de OpenAI. Se guardará localmente en tu navegador.';
+  desc.innerText = 'Para usar NotionIA, necesitas conectar tu propia API Key de Groq. Se guardará localmente en tu navegador.';
   desc.style.color = 'var(--text-muted)';
   desc.style.marginBottom = '1.5rem';
   desc.style.fontSize = '0.9rem';
@@ -123,13 +123,13 @@ function renderPage(pageId) {
 
   // Update Title
   const titles = {
-    'nav-dashboard': 'Inicio',
+    // 'nav-dashboard': 'Inicio', // REMOVED
     'nav-chat': 'Chat IA',
     'nav-calendar': 'Calendario',
     'nav-projects': 'Proyectos',
     'nav-tasks': 'Tareas'
   };
-  if (pageTitle) pageTitle.innerText = titles[pageId] || 'Dashboard';
+  if (pageTitle) pageTitle.innerText = titles[pageId] || 'NotionIA';
 
   // Render Module based on ID
   switch (pageId) {
@@ -142,7 +142,6 @@ function renderPage(pageId) {
       import('./components/Calendar.js').then(module => {
         contentContainer.appendChild(module.Calendar());
       });
-      // contentContainer.innerHTML = '<div class="text-muted">Calendar Module Loading...</div>';
       break;
     case 'nav-projects':
       import('./components/Projects.js').then(module => {
@@ -155,12 +154,10 @@ function renderPage(pageId) {
       });
       break;
     default:
-      contentContainer.innerHTML = `
-        <div class="flex-col gap-md">
-            <h1 style="font-size: 2rem; font-weight: 600;">Bienvenido, Usuario</h1>
-            <p class="text-muted">Selecciona un módulo de la barra lateral para comenzar.</p>
-        </div>
-      `;
+      // Fallback to chat
+      import('./components/Chatbot.js').then(module => {
+        contentContainer.appendChild(module.Chatbot());
+      });
   }
 }
 
@@ -170,4 +167,4 @@ window.addEventListener('navigate', (e) => {
 });
 
 // Default Route
-renderPage('nav-dashboard');
+renderPage('nav-chat');
