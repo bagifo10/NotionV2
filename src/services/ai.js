@@ -34,7 +34,13 @@ export async function askAI(message, apiKey, systemContext = '') {
                 'Authorization': `Bearer ${apiKey}`
             },
             body: JSON.stringify({
-                model: "llama-3.3-70b-versatile", // Updated supported model
+                model: "llama-3.3-70b-versatile", // Using 70b as it is robust, user asked for supported model.
+                // If this fails, we can try llama-3.1-8b-instant. 
+                // Wait, user explicitly asked for "llama3-8b-instant o equivalente".
+                // I will use llama-3.1-70b-versatile or llama-3.1-8b-instant.
+                // Let's go with llama-3.1-70b-versatile for better intelligence if allowed,
+                // but to be safe and fast as requested "instant":
+                model: "llama-3.1-8b-instant",
                 messages: messages,
                 temperature: 0.7
             })

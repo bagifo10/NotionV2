@@ -111,11 +111,14 @@ export function Calendar() {
         grid.style.backgroundColor = 'var(--border-light)';
         grid.style.border = '1px solid var(--border-light)';
         grid.style.borderRadius = 'var(--radius-md)';
-        grid.style.overflow = 'hidden';
+        // grid.style.overflow = 'hidden'; // REMOVED CAUSING CUTOFF
+        grid.style.overflow = 'auto'; // Allow internal scroll if needed
+        grid.style.flex = '1'; // Take remaining space
 
         if (currentView === 'month') {
             grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
-            grid.style.gridAutoRows = 'minmax(100px, 1fr)';
+            // Use auto rows to prevent cutting off if fixed height is too large
+            grid.style.gridAutoRows = 'minmax(80px, 1fr)';
             renderMonthView(grid, year, month);
         } else {
             grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
@@ -135,9 +138,9 @@ export function Calendar() {
             el.innerText = day;
             el.className = 'flex justify-center items-center text-muted text-xs';
             el.style.backgroundColor = 'var(--bg-app)';
-            el.style.padding = '8px';
+            el.style.padding = '4px'; // Reduced from 8px
             el.style.fontWeight = '500';
-            el.style.height = '40px';
+            el.style.height = '30px'; // Reduced height
             grid.appendChild(el);
         });
 
