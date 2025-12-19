@@ -1,5 +1,5 @@
 import { askAI } from '../services/ai.js';
-import { addTask, addEvent, getFullContext } from '../services/data.js';
+import { addTask, addEvent, addProject, getFullContext } from '../services/data.js';
 
 export function Chatbot() {
     const container = document.createElement('div');
@@ -223,10 +223,12 @@ export function Chatbot() {
                 if (actionObj.action === 'create_task') {
                     addTask(actionObj.data);
                     finalResponse = `✅ Tarea creada: **${actionObj.data.title}** (${actionObj.data.priority})`;
-                    // Notify Task Module
                 } else if (actionObj.action === 'create_event') {
                     addEvent(actionObj.data);
                     finalResponse = `✅ Evento agendado: **${actionObj.data.title}** para el ${actionObj.data.date}`;
+                } else if (actionObj.action === 'create_project') {
+                    addProject(actionObj.data);
+                    finalResponse = `✅ Proyecto creado: **${actionObj.data.title}**`;
                 }
             }
         } catch (e) {

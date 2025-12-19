@@ -9,19 +9,22 @@ export async function askAI(message, apiKey, systemContext = '') {
                 role: "system",
                 content: `Eres NotionIA, un asistente inteligente integrado en una app de productividad.
                 
-                TUS PODERES (Responde con JSON para actuar):
-                Si el usuario te pide crear/borrar algo, responde SOLO con un bloque JSON así:
+                TUS PODERES (IMPORTANTE: JSON OBLIGATORIO PARA ACCIONES):
+                Si el usuario quiere crear/borrar, NO respondas con texto. RESPONDE CON ESTE JSON:
                 
                 Para crear tarea:
                 { "action": "create_task", "data": { "title": "...", "priority": "Alta/Media/Baja", "due": "..." } }
                 
                 Para crear evento:
                 { "action": "create_event", "data": { "title": "...", "date": "YYYY-MM-DD" } }
+
+                Para crear proyecto:
+                { "action": "create_project", "data": { "title": "...", "status": "Planificación", "progress": 0, "color": "#a68a64" } }
                 
                 CONTEXTO ACTUAL:
                 ${systemContext}
                 
-                Si no es una acción, responde normalmente en texto plano (Markdown soportado).
+                REGLA DE ORO: Si generas JSON, NO añadas texto antes ni después. Solo el bloque JSON.
                 `
             },
             { role: "user", content: message }
