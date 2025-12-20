@@ -1,5 +1,5 @@
 import { askAI } from '../services/ai.js';
-import { addTask, addEvent, addProject, getFullContext } from '../services/data.js';
+import { addTask, addEvent, addProject, deleteProject, deleteTask, getFullContext } from '../services/data.js';
 
 export function Chatbot() {
     const container = document.createElement('div');
@@ -229,6 +229,22 @@ export function Chatbot() {
                 } else if (actionObj.action === 'create_project') {
                     addProject(actionObj.data);
                     finalResponse = `✅ Proyecto creado: **${actionObj.data.title}**`;
+                } else if (actionObj.action === 'delete_project') {
+                    if (actionObj.data.ids && Array.isArray(actionObj.data.ids)) {
+                        actionObj.data.ids.forEach(id => deleteProject(id));
+                        finalResponse = `🗑️ ${actionObj.data.ids.length} proyecto(s) eliminado(s) correctamente.`;
+                    } else if (actionObj.data.id) {
+                        deleteProject(actionObj.data.id);
+                        finalResponse = `🗑️ Proyecto eliminado correctamente.`;
+                    }
+                } else if (actionObj.action === 'delete_task') {
+                    if (actionObj.data.ids && Array.isArray(actionObj.data.ids)) {
+                        actionObj.data.ids.forEach(id => deleteTask(id));
+                        finalResponse = `🗑️ ${actionObj.data.ids.length} tarea(s) eliminada(s) correctamente.`;
+                    } else if (actionObj.data.id) {
+                        deleteTask(actionObj.data.id);
+                        finalResponse = `🗑️ Tarea eliminada correctamente.`;
+                    }
                 }
             }
         } catch (e) {
