@@ -213,41 +213,69 @@ export function Chatbot() {
         history.removeChild(thinkingWrapper);
 
 
+
         // Parse Response for JSON actions
         let finalResponse = response;
         try {
-            // Check for multiple JSON blocks
-            const jsonMatches = response.match(/\{[\s\S]*?\}/g);
-            if (jsonMatches) {
+            // Find possible JSON objects by looking for { and balancing braces
+            const actions = [];
+            let startIdx = response.indexOf('{');
+
+            while (startIdx !== -1) {
+                let braceCount = 0;
+                let endIdx = -1;
+
+                for (let i = startIdx; i < response.length; i++) {
+                    if (response[i] === '{') braceCount++;
+                    else if (response[i] === '}') braceCount--;
+
+                    if (braceCount === 0) {
+                        endIdx = i;
+                        break;
+                    }
+                }
+
+                if (endIdx !== -1) {
+                    const jsonStr = response.substring(startIdx, endIdx + 1);
+                    try {
+                        const actionObj = JSON.parse(jsonStr);
+                        if (actionObj.action) actions.push(actionObj);
+                    } catch (e) {
+                        console.log('Detected block is not valid JSON:', jsonStr);
+                    }
+                    startIdx = response.indexOf('{', endIdx + 1);
+                } else {
+                    break;
+                }
+            }
+
+            if (actions.length > 0) {
                 let actionCount = 0;
                 let lastActionDesc = '';
 
-                for (const jsonStr of jsonMatches) {
-                    try {
-                        const actionObj = JSON.parse(jsonStr);
-                        actionCount++;
-
-                        if (actionObj.action === 'create_task') {
-                            addTask(actionObj.data);
-                            lastActionDesc = `✅ Tarea creada: **${actionObj.data.title}**`;
-                        } else if (actionObj.action === 'create_event') {
-                            addEvent(actionObj.data);
-                            lastActionDesc = `✅ Evento agendado: **${actionObj.data.title}**`;
-                        } else if (actionObj.action === 'create_project') {
-                            addProject(actionObj.data);
-                            lastActionDesc = `✅ Proyecto creado: **${actionObj.data.title}**`;
-                        } else if (actionObj.action === 'delete_project') {
-                            deleteProject(actionObj.data.id || actionObj.data.ids?.[0]);
-                            lastActionDesc = `🗑️ Proyecto eliminado correctamente.`;
-                        } else if (actionObj.action === 'delete_task') {
-                            deleteTask(actionObj.data.id || actionObj.data.ids?.[0]);
-                            lastActionDesc = `🗑️ Tarea eliminada correctamente.`;
-                        } else if (actionObj.action === 'delete_event') {
-                            deleteEvent(actionObj.data.id || actionObj.data.ids?.[0]);
-                            lastActionDesc = `🗑️ Evento/Recordatorio eliminado correctamente.`;
-                        }
-                    } catch (innerE) {
-                        console.log('Skipping invalid JSON block');
+                for (const actionObj of actions) {
+                    actionCount++;
+                    if (actionObj.action === 'create_task') {
+                        addTask(actionObj.data);
+                        lastActionDesc = `✅ Tarea creada: **${actionObj.data.title}**`;
+                    } else if (actionObj.action === 'create_event') {
+                        addEvent(actionObj.data);
+                        lastActionDesc = `✅ Evento agendado: **${actionObj.data.title}**`;
+                    } else if (actionObj.action === 'create_project') {
+                        addProject(actionObj.data);
+                        lastActionDesc = `✅ Proyecto creado: **${actionObj.data.title}**`;
+                    } else if (actionObj.action === 'delete_project') {
+                        const id = actionObj.data.id || (Array.isArray(actionObj.data.ids) ? actionObj.data.ids[0] : null);
+                        if (id) deleteProject(id);
+                        lastActionDesc = `🗑️ Proyecto eliminado correctamente.`;
+                    } else if (actionObj.action === 'delete_task') {
+                        const id = actionObj.data.id || (Array.isArray(actionObj.data.ids) ? actionObj.data.ids[0] : null);
+                        if (id) deleteTask(id);
+                        lastActionDesc = `🗑️ Tarea eliminada correctamente.`;
+                    } else if (actionObj.action === 'delete_event') {
+                        const id = actionObj.data.id || (Array.isArray(actionObj.data.ids) ? actionObj.data.ids[0] : null);
+                        if (id) deleteEvent(id);
+                        lastActionDesc = `🗑️ Evento/Recordatorio eliminado correctamente.`;
                     }
                 }
 
