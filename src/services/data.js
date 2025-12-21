@@ -82,6 +82,11 @@ export function addEvent(event) {
     return event;
 }
 
+export function deleteEvent(id) {
+    const events = getEvents().filter(e => e.id !== id);
+    saveEvents(events);
+}
+
 // --- AI CONTEXT HELPER ---
 export function getFullContext() {
     return {

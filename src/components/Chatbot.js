@@ -1,5 +1,5 @@
 import { askAI } from '../services/ai.js';
-import { addTask, addEvent, addProject, deleteProject, deleteTask, getFullContext } from '../services/data.js';
+import { addTask, addEvent, addProject, deleteProject, deleteTask, deleteEvent, getFullContext } from '../services/data.js';
 
 export function Chatbot() {
     const container = document.createElement('div');
@@ -212,43 +212,53 @@ export function Chatbot() {
 
         history.removeChild(thinkingWrapper);
 
+
         // Parse Response for JSON actions
         let finalResponse = response;
         try {
-            // Check for JSON code block or raw JSON
-            const jsonMatch = response.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-                const actionObj = JSON.parse(jsonMatch[0]);
+            // Check for multiple JSON blocks
+            const jsonMatches = response.match(/\{[\s\S]*?\}/g);
+            if (jsonMatches) {
+                let actionCount = 0;
+                let lastActionDesc = '';
 
-                if (actionObj.action === 'create_task') {
-                    addTask(actionObj.data);
-                    finalResponse = `✅ Tarea creada: **${actionObj.data.title}** (${actionObj.data.priority})`;
-                } else if (actionObj.action === 'create_event') {
-                    addEvent(actionObj.data);
-                    finalResponse = `✅ Evento agendado: **${actionObj.data.title}** para el ${actionObj.data.date}`;
-                } else if (actionObj.action === 'create_project') {
-                    addProject(actionObj.data);
-                    finalResponse = `✅ Proyecto creado: **${actionObj.data.title}**`;
-                } else if (actionObj.action === 'delete_project') {
-                    if (actionObj.data.ids && Array.isArray(actionObj.data.ids)) {
-                        actionObj.data.ids.forEach(id => deleteProject(id));
-                        finalResponse = `🗑️ ${actionObj.data.ids.length} proyecto(s) eliminado(s) correctamente.`;
-                    } else if (actionObj.data.id) {
-                        deleteProject(actionObj.data.id);
-                        finalResponse = `🗑️ Proyecto eliminado correctamente.`;
+                for (const jsonStr of jsonMatches) {
+                    try {
+                        const actionObj = JSON.parse(jsonStr);
+                        actionCount++;
+
+                        if (actionObj.action === 'create_task') {
+                            addTask(actionObj.data);
+                            lastActionDesc = `✅ Tarea creada: **${actionObj.data.title}**`;
+                        } else if (actionObj.action === 'create_event') {
+                            addEvent(actionObj.data);
+                            lastActionDesc = `✅ Evento agendado: **${actionObj.data.title}**`;
+                        } else if (actionObj.action === 'create_project') {
+                            addProject(actionObj.data);
+                            lastActionDesc = `✅ Proyecto creado: **${actionObj.data.title}**`;
+                        } else if (actionObj.action === 'delete_project') {
+                            deleteProject(actionObj.data.id || actionObj.data.ids?.[0]);
+                            lastActionDesc = `🗑️ Proyecto eliminado correctamente.`;
+                        } else if (actionObj.action === 'delete_task') {
+                            deleteTask(actionObj.data.id || actionObj.data.ids?.[0]);
+                            lastActionDesc = `🗑️ Tarea eliminada correctamente.`;
+                        } else if (actionObj.action === 'delete_event') {
+                            deleteEvent(actionObj.data.id || actionObj.data.ids?.[0]);
+                            lastActionDesc = `🗑️ Evento/Recordatorio eliminado correctamente.`;
+                        }
+                    } catch (innerE) {
+                        console.log('Skipping invalid JSON block');
                     }
-                } else if (actionObj.action === 'delete_task') {
-                    if (actionObj.data.ids && Array.isArray(actionObj.data.ids)) {
-                        actionObj.data.ids.forEach(id => deleteTask(id));
-                        finalResponse = `🗑️ ${actionObj.data.ids.length} tarea(s) eliminada(s) correctamente.`;
-                    } else if (actionObj.data.id) {
-                        deleteTask(actionObj.data.id);
-                        finalResponse = `🗑️ Tarea eliminada correctamente.`;
-                    }
+                }
+
+                if (actionCount > 1) {
+                    finalResponse = `✅ Se ejecutaron **${actionCount}** acciones correctamente.`;
+                } else if (actionCount === 1) {
+                    finalResponse = lastActionDesc;
                 }
             }
         } catch (e) {
-            console.log('No valid JSON action found, using raw text');
+            console.log('Error processing AI actions:', e);
         }
 
         addMessage(finalResponse, 'ai', false);
