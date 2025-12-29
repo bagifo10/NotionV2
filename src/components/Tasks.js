@@ -93,7 +93,16 @@ export function Tasks() {
             const text = document.createElement('span');
             text.innerText = t.title;
             text.style.fontSize = '0.95rem';
+            text.style.cursor = 'pointer';
             if (t.done) text.style.textDecoration = 'line-through';
+
+            text.onclick = () => {
+                const newTitle = prompt('Nuevo título de la tarea:', t.title);
+                if (newTitle && newTitle !== t.title) {
+                    import('../services/data.js').then(m => m.updateTask(t.id, { title: newTitle }));
+                    renderList();
+                }
+            };
 
             titleCol.appendChild(checkbox);
             titleCol.appendChild(text);
@@ -107,6 +116,15 @@ export function Tasks() {
             badge.className = 'text-xs';
             badge.style.padding = '2px 8px';
             badge.style.borderRadius = 'var(--radius-full)';
+            badge.style.cursor = 'pointer';
+
+            badge.onclick = () => {
+                const newP = prompt('Prioridad (Alta, Media, Baja):', t.priority);
+                if (newP) {
+                    import('../services/data.js').then(m => m.updateTask(t.id, { priority: newP }));
+                    renderList();
+                }
+            };
 
             // Basic Color Logic
             const p = (t.priority || '').toLowerCase();
@@ -127,7 +145,16 @@ export function Tasks() {
             const dueCol = document.createElement('div');
             dueCol.style.width = '120px';
             dueCol.className = 'text-sm text-dim';
+            dueCol.style.cursor = 'pointer';
             dueCol.innerText = t.due;
+
+            dueCol.onclick = () => {
+                const newDue = prompt('Fecha límite (Ej: Hoy, Mañana, YYYY-MM-DD):', t.due);
+                if (newDue) {
+                    import('../services/data.js').then(m => m.updateTask(t.id, { due: newDue }));
+                    renderList();
+                }
+            };
 
             // Delete Action
             const actionCol = document.createElement('div');

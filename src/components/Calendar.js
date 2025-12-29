@@ -188,17 +188,35 @@ export function Calendar() {
             const dayEvents = events.filter(e => e.date === dateStr);
             dayEvents.forEach(e => {
                 const badge = document.createElement('div');
-                badge.className = 'text-xs truncate';
+                badge.className = 'text-xs truncate hover-bg';
                 badge.innerText = e.title;
                 badge.style.padding = '2px 4px';
                 badge.style.backgroundColor = `${e.color}44`;
                 badge.style.color = e.color;
                 badge.style.borderRadius = '2px';
                 badge.style.marginTop = '2px';
+                badge.style.cursor = 'pointer';
+
+                badge.onclick = (event) => {
+                    event.stopPropagation();
+                    const action = prompt(`Editar evento "${e.title}":\n1. Cambiar nombre\n2. Borrar\n(Escribe 1 o 2)`, "1");
+                    if (action === "1") {
+                        const newTitle = prompt("Nuevo nombre:", e.title);
+                        if (newTitle) {
+                            import('../services/data.js').then(m => m.updateEvent(e.id, { title: newTitle }));
+                            render();
+                        }
+                    } else if (action === "2") {
+                        if (confirm(`¿Borrar "${e.title}"?`)) {
+                            import('../services/data.js').then(m => m.deleteEvent(e.id));
+                            render();
+                        }
+                    }
+                };
                 cell.appendChild(badge);
             });
 
-            // Add Event Logic
+            // Add Event Logic (Click on cell empty space)
             cell.onclick = () => {
                 const title = prompt(`Nuevo evento para ${dateStr}:`);
                 if (title) {

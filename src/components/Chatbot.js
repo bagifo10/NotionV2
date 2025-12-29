@@ -212,34 +212,32 @@ export function Chatbot() {
 
         history.removeChild(thinkingWrapper);
 
-
-
         // Parse Response for JSON actions
-        let finalResponse = response;
+        let finalDisplayResponse = response;
+        const actions = [];
         try {
             // Find possible JSON objects by looking for { and balancing braces
-            const actions = [];
             let startIdx = response.indexOf('{');
-
             while (startIdx !== -1) {
                 let braceCount = 0;
                 let endIdx = -1;
-
                 for (let i = startIdx; i < response.length; i++) {
                     if (response[i] === '{') braceCount++;
                     else if (response[i] === '}') braceCount--;
-
                     if (braceCount === 0) {
                         endIdx = i;
                         break;
                     }
                 }
-
                 if (endIdx !== -1) {
                     const jsonStr = response.substring(startIdx, endIdx + 1);
                     try {
                         const actionObj = JSON.parse(jsonStr);
-                        if (actionObj.action) actions.push(actionObj);
+                        if (actionObj.action) {
+                            actions.push(actionObj);
+                            // Remove JSON from displayed text
+                            finalDisplayResponse = finalDisplayResponse.replace(jsonStr, '');
+                        }
                     } catch (e) {
                         console.log('Detected block is not valid JSON:', jsonStr);
                     }
@@ -249,48 +247,44 @@ export function Chatbot() {
                 }
             }
 
-            if (actions.length > 0) {
-                let actionCount = 0;
-                let lastActionDesc = '';
+            // Clean up empty lines or artifacts in text
+            finalDisplayResponse = finalDisplayResponse.trim().replace(/\n{2,}/g, '\n');
 
+            if (actions.length > 0) {
                 for (const actionObj of actions) {
-                    actionCount++;
                     if (actionObj.action === 'create_task') {
                         addTask(actionObj.data);
-                        lastActionDesc = `✅ Tarea creada: **${actionObj.data.title}**`;
                     } else if (actionObj.action === 'create_event') {
                         addEvent(actionObj.data);
-                        lastActionDesc = `✅ Evento agendado: **${actionObj.data.title}**`;
                     } else if (actionObj.action === 'create_project') {
                         addProject(actionObj.data);
-                        lastActionDesc = `✅ Proyecto creado: **${actionObj.data.title}**`;
+                    } else if (actionObj.action === 'edit_task') {
+                        import('../services/data.js').then(m => m.updateTask(actionObj.data.id, actionObj.data));
+                    } else if (actionObj.action === 'edit_event') {
+                        import('../services/data.js').then(m => m.updateEvent(actionObj.data.id, actionObj.data));
                     } else if (actionObj.action === 'delete_project') {
                         const id = actionObj.data.id || (Array.isArray(actionObj.data.ids) ? actionObj.data.ids[0] : null);
                         if (id) deleteProject(id);
-                        lastActionDesc = `🗑️ Proyecto eliminado correctamente.`;
                     } else if (actionObj.action === 'delete_task') {
                         const id = actionObj.data.id || (Array.isArray(actionObj.data.ids) ? actionObj.data.ids[0] : null);
                         if (id) deleteTask(id);
-                        lastActionDesc = `🗑️ Tarea eliminada correctamente.`;
                     } else if (actionObj.action === 'delete_event') {
                         const id = actionObj.data.id || (Array.isArray(actionObj.data.ids) ? actionObj.data.ids[0] : null);
                         if (id) deleteEvent(id);
-                        lastActionDesc = `🗑️ Evento/Recordatorio eliminado correctamente.`;
                     }
-                }
-
-                if (actionCount > 1) {
-                    finalResponse = `✅ Se ejecutaron **${actionCount}** acciones correctamente.`;
-                } else if (actionCount === 1) {
-                    finalResponse = lastActionDesc;
                 }
             }
         } catch (e) {
             console.log('Error processing AI actions:', e);
         }
 
-        addMessage(finalResponse, 'ai', false);
-        localHistory.push({ role: 'ai', text: finalResponse });
+        // If after cleaning JSON there's no text, provide a fallback
+        if (!finalDisplayResponse && actions.length > 0) {
+            finalDisplayResponse = `He procesado **${actions.length}** acciones correctamente.`;
+        }
+
+        addMessage(finalDisplayResponse, 'ai', false);
+        localHistory.push({ role: 'ai', text: finalDisplayResponse });
         localStorage.setItem('chat_history', JSON.stringify(localHistory));
     };
 

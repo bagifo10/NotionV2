@@ -34,6 +34,17 @@ export function deleteTask(id) {
     saveTasks(tasks);
 }
 
+export function updateTask(id, updates) {
+    const tasks = getTasks();
+    const index = tasks.findIndex(t => t.id === id);
+    if (index !== -1) {
+        tasks[index] = { ...tasks[index], ...updates };
+        saveTasks(tasks);
+        return tasks[index];
+    }
+    return null;
+}
+
 // --- PROJECTS ---
 export function getProjects() {
     const data = localStorage.getItem(STORAGE_KEYS.PROJECTS);
@@ -61,6 +72,17 @@ export function deleteProject(id) {
     saveProjects(projects);
 }
 
+export function updateProject(id, updates) {
+    const projects = getProjects();
+    const index = projects.findIndex(p => p.id === id);
+    if (index !== -1) {
+        projects[index] = { ...projects[index], ...updates };
+        saveProjects(projects);
+        return projects[index];
+    }
+    return null;
+}
+
 // --- CALENDAR EVENTS ---
 export function getEvents() {
     const data = localStorage.getItem(STORAGE_KEYS.EVENTS);
@@ -85,6 +107,17 @@ export function addEvent(event) {
 export function deleteEvent(id) {
     const events = getEvents().filter(e => e.id !== id);
     saveEvents(events);
+}
+
+export function updateEvent(id, updates) {
+    const events = getEvents();
+    const index = events.findIndex(e => e.id === id);
+    if (index !== -1) {
+        events[index] = { ...events[index], ...updates };
+        saveEvents(events);
+        return events[index];
+    }
+    return null;
 }
 
 // --- AI CONTEXT HELPER ---
